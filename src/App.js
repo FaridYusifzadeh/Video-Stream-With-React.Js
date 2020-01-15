@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+// import { render } from 'react-dom';
+import VideoRecorder from 'react-video-recorder';
+import axios from 'axios';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+export default class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      video_data: null
+    };
+  }
 
-export default App;
+  //Click  and send video
+  sendVideo = () => {
+    let form = new FormData();
+    form.append('file', this.state.video_data, 'myvideo');
+
+    axios({
+      method: 'post',
+      url: 'http://127.0.0.1:5000/video',
+      data: form
+    }).then(function(response) {
+      console.log(response);
+    });
+    console.log('state olan video', this.state.video_data);
+  };
+
+  render() {
+    return (
+      <>
+        <div className='App'>
+          <VideoRecorder
+          // time limit recording
+          timeLimit={3000}
+            onRecordingComplete={videoBlob => {
+              this.setState({ video_data: videoBlob }); 
+            }}
+          />
+          <div className='button_contaner'>
+            <button
+              className='send_button'
+              onClick={this.sendVideo}
+              disabled={this.state.video_data === null ? true : false}
+            >
+              Send Video
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+}
